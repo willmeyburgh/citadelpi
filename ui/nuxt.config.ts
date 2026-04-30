@@ -8,8 +8,13 @@ export default defineNuxtConfig({
     plugins: [
       tailwindcss(),
     ],
+    server: {
+      host: '0.0.0.0',
+      port: 3000,
+      allowedHosts: ['citadelpi'],
+    },
   },
-  modules: ['shadcn-nuxt', '@nuxtjs/color-mode'],
+  modules: ['@pinia/nuxt', 'shadcn-nuxt', '@nuxtjs/color-mode'],
   shadcn: {
     prefix: '',
     componentDir: '@/components/ui',
