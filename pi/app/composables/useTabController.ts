@@ -1,4 +1,6 @@
 const routes = ['/trials', '/factorio']
+const HEARTBEAT_INTERVAL = 15_000
+const RECONNECT_DELAY = 3000
 
 export const useTabController = () => {
   const config = useRuntimeConfig()
@@ -12,8 +14,24 @@ export const useTabController = () => {
 
     let ws: WebSocket
     let reconnectTimer: ReturnType<typeof setTimeout>
+    let heartbeatTimer: ReturnType<typeof setInterval>
+
+    function cleanup() {
+      clearInterval(heartbeatTimer)
+      clearTimeout(reconnectTimer)
+      if (ws) {
+        ws.onopen = null
+        ws.onclose = null
+        ws.onerror = null
+        ws.onmessage = null
+        if (ws.readyState === WebSocket.OPEN || ws.readyState === WebSocket.CONNECTING) {
+          ws.close()
+        }
+      }
+    }
 
     function setup() {
+      cleanup()
       ws = new WebSocket(wsUrl)
 
       ws.onmessage = (event) => {
@@ -29,20 +47,27 @@ export const useTabController = () => {
       }
 
       ws.onclose = () => {
-        reconnectTimer = setTimeout(setup, 3000)
+        reconnectTimer = setTimeout(setup, RECONNECT_DELAY)
       }
 
       ws.onerror = () => {
-        ws.close()
+        /* onclose will fire after onerror — no need to call ws.close() */
+      }
+
+      ws.onopen = () => {
+        heartbeatTimer = setInterval(() => {
+          if (ws.readyState === WebSocket.OPEN) {
+            ws.send(JSON.stringify({ type: 'ping' }))
+          } else {
+            clearInterval(heartbeatTimer)
+          }
+        }, HEARTBEAT_INTERVAL)
       }
     }
 
     setup()
 
-    onUnmounted(() => {
-      clearTimeout(reconnectTimer)
-      ws?.close()
-    })
+    onUnmounted(cleanup)
   }
 
   return { currentTab, connect }
