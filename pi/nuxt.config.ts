@@ -24,4 +24,12 @@ export default defineNuxtConfig({
     fallback: 'dark',
     classSuffix: '',
   },
+  runtimeConfig: {
+    public: {
+      laptopHost: '192.168.2.176',
+    },
+  },
+  routeRules: {
+    '/': { redirect: '/trials' },
+  },
 })

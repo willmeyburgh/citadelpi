@@ -2,7 +2,7 @@
 export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
 
-cd /home/will/citadelpi/ui
+cd /home/will/citadelpi/pi
 
 PID=$(lsof -t -i:8080 2>/dev/null)
 if [ -n "$PID" ]; then
