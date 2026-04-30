@@ -44,6 +44,14 @@ async def tab_prev():
     return JSONResponse({"tab": current_tab})
 
 
+@app.get("/status")
+async def status():
+    return JSONResponse({
+        "running": True,
+        "connected": len(connected_clients)
+    })
+
+
 @app.get("/tab/{tab_id}")
 async def tab_set(tab_id: int):
     global current_tab
